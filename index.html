@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Jam EMR — The FHIR-Native Open Source EMR</title>
+<meta name="description" content="Jam EMR is the only open source EMR that stores every patient record natively as FHIR R4. 16 clinical modules, SMART on FHIR v2, DHIS2 reporting, MIT licensed."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ═══ JAM EMR — Pure Light Palette ═══════════════════════════
+     No black, no dark brown, no dark backgrounds anywhere.
+     Every surface is white, a soft tint, or a vivid mid-tone.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Forest teal — brand primary */
+  --forest:     #0E6655;
+  --forest-mid: #138A70;
+  --forest-light:#1AAF8C;
+  --forest-pale: #E8F7F3;
+  --forest-mist: #F2FAF8;
+
+  /* Sky blue — contrast accent */
+  --sky:      #0C7ABF;
+  --sky-mid:  #1090D8;
+  --sky-light:#1AAAE8;
+  --sky-pale: #E6F4FC;
+  --sky-mist: #F0F8FE;
+
+  /* Amber gold — action / highlight */
+  --amber:      #D4820A;
+  --amber-mid:  #E8960E;
+  --amber-light:#F5AA20;
+  --amber-pale: #FEF3E0;
+  --amber-mist: #FFFAEF;
+
+  /* Coral — warm accent for alternating sections */
+  --coral:      #D4461A;
+  --coral-pale: #FDEEE9;
+
+  /* Page backgrounds — a family of warm whites */
+  --bg-white:   #FFFFFF;
+  --bg-snow:    #F8FFFE;   /* faint teal tint */
+  --bg-ice:     #F4FBFF;   /* faint sky tint */
+  --bg-cream:   #FEF9F2;   /* faint amber tint */
+  --bg-blush:   #FEF4F0;   /* faint coral tint */
+  --bg-sage:    #F2FAF7;   /* sage green tint */
+
+  /* "Feature" section — vivid forest (replaces dark sections) */
+  --vivid-bg:   #0A7A64;   /* mid-tone forest — text stays legible */
+  --vivid-bg2:  #0D8A72;
+  --vivid-sky:  #0B6FAE;
+
+  /* Text */
+  --ink:     #0F2820;   /* very dark teal-green — NOT black */
+  --ink-mid: #1A4035;
+  --ink-soft:#2E6055;
+  --muted:   #5A8A78;
+  --muted-lt:#8AB8A8;
+
+  /* Borders */
+  --border:     #C8E8DE;
+  --border-sky: #B8D8F0;
+  --border-amb: #EED0A0;
+  --border-soft:#DFF0EA;
+
+  --r:12px;--r-sm:8px;--r-lg:18px;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;font-size:16px;line-height:1.7;color:var(--ink);background:var(--bg-white);-webkit-font-smoothing:antialiased}
+
+/* ── Announcement bar — vivid forest ─────── */
+.ann{
+  background:linear-gradient(90deg,var(--forest) 0%,var(--forest-mid) 50%,var(--forest-light) 100%);
+  color:rgba(255,255,255,.9);font-size:13px;font-weight:500;
+  padding:10px 2rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px
+}
+.ann a{color:#FFF5C8;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(255,245,200,.4)}
+.ann a:hover{color:#FFFFFF}
+.ann-pip{width:6px;height:6px;border-radius:50%;background:#FFFAAA;animation:blink 2.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── Navbar ──────────────────────────────── */
+.nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(16px);
+  border-bottom:1.5px solid var(--border);
+  padding:0 2rem;height:64px;
+  display:flex;align-items:center;justify-content:space-between
+}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,var(--forest) 0%,var(--forest-light) 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(14,102,85,.3)
+}
+.nav-name{font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:var(--ink);letter-spacing:-.01em}
+.nav-name span{color:var(--forest-mid)}
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{font-size:14px;font-weight:500;color:var(--ink-soft);text-decoration:none;padding:6px 12px;border-radius:var(--r-sm);transition:background .12s,color .12s}
+.nav-links a:hover{background:var(--forest-pale);color:var(--forest)}
+.nav-pill{background:var(--forest)!important;color:#fff!important;font-weight:600!important;border-radius:8px!important;padding:7px 16px!important}
+.nav-pill:hover{background:var(--forest-mid)!important}
+.nav-ghost{border:1.5px solid var(--border)!important;color:var(--ink-soft)!important}
+.nav-ghost:hover{border-color:var(--forest)!important;color:var(--forest)!important;background:var(--forest-pale)!important}
+
+/* ── Hero — sky-to-white gradient ────────── */
+.hero{
+  position:relative;overflow:hidden;
+  padding:7rem 2rem 5.5rem;text-align:center;
+  background:linear-gradient(160deg, var(--bg-ice) 0%, var(--bg-snow) 45%, var(--bg-white) 100%);
+  border-bottom:1.5px solid var(--border)
+}
+/* Dot grid overlay */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,var(--forest-pale) 1px,transparent 1px);
+  background-size:28px 28px;opacity:.6;pointer-events:none
+}
+/* Teal glow top-right */
+.hero::after{
+  content:'';position:absolute;top:-100px;right:-80px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(14,102,85,.08) 0%,transparent 65%);
+  pointer-events:none
+}
+/* Sky glow bottom-left */
+.hero-glow2{
+  position:absolute;bottom:-120px;left:-100px;
+  width:450px;height:450px;border-radius:50%;
+  background:radial-gradient(circle,rgba(12,122,191,.07) 0%,transparent 65%);
+  pointer-events:none
+}
+.hero-inner{position:relative;max-width:900px;margin:0 auto}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--forest);background:var(--forest-pale);
+  border:1.5px solid rgba(14,102,85,.2);
+  padding:5px 16px;border-radius:20px;margin-bottom:2rem
+}
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--forest-light)}
+.hero-h1{
+  font-family:'Sora',sans-serif;
+  font-size:clamp(2.8rem,6.5vw,4.75rem);
+  font-weight:800;line-height:1.07;letter-spacing:-.03em;
+  color:var(--ink);margin-bottom:1.5rem
+}
+.hero-h1 .ga{color:var(--amber)}
+.hero-h1 .gt{color:var(--forest-mid)}
+.hero-sub{
+  font-size:1.175rem;color:var(--ink-soft);
+  max-width:660px;margin:0 auto 3rem;line-height:1.75
+}
+.hero-sub strong{color:var(--forest);font-weight:600}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.btn-forest{
+  background:var(--forest);color:white;
+  font-size:15px;font-weight:700;padding:.85rem 1.9rem;
+  border-radius:var(--r-sm);text-decoration:none;border:none;cursor:pointer;
+  transition:background .15s,transform .12s,box-shadow .15s;
+  display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 4px 18px rgba(14,102,85,.3)
+}
+.btn-forest:hover{background:var(--forest-mid);transform:translateY(-2px);box-shadow:0 6px 26px rgba(14,102,85,.4)}
+.btn-sky{
+  background:var(--sky);color:white;
+  font-size:15px;font-weight:600;padding:.85rem 1.75rem;
+  border-radius:var(--r-sm);text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 4px 18px rgba(12,122,191,.25);
+  transition:background .15s,transform .12s
+}
+.btn-sky:hover{background:var(--sky-mid);transform:translateY(-2px)}
+.btn-outline{
+  background:transparent;color:var(--ink-soft);
+  font-size:15px;font-weight:500;padding:.85rem 1.6rem;
+  border-radius:var(--r-sm);text-decoration:none;
+  border:1.5px solid var(--border);
+  transition:border-color .15s,color .15s;
+  display:inline-flex;align-items:center;gap:8px
+}
+.btn-outline:hover{border-color:var(--forest);color:var(--forest)}
+.trust{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 10px;font-size:12px;color:var(--muted)}
+.trust-lbl{font-weight:600;color:var(--ink-soft);margin-right:4px}
+.tbadge{
+  font-size:11px;font-weight:600;padding:3px 11px;border-radius:20px;
+  background:var(--bg-white);border:1.5px solid var(--border);
+  color:var(--forest);letter-spacing:.01em
+}
+
+/* ── Stats bar — forest vivid ─────────────── */
+.stats{background:var(--vivid-bg);border-top:1.5px solid rgba(255,255,255,.12);border-bottom:1.5px solid rgba(255,255,255,.1)}
+.stats-inner{max-width:1140px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center}
+.st{padding:1.25rem 2.75rem;border-right:1px solid rgba(255,255,255,.1);text-align:center;flex:1;min-width:130px}
+.st:last-child{border-right:none}
+.st-n{display:block;font-family:'Sora',sans-serif;font-size:2rem;font-weight:700;color:#FFFAAA;letter-spacing:-.025em;line-height:1}
+.st-l{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.05em;text-transform:uppercase}
+
+/* ── Layout helpers ────────────────────────── */
+.wrap{max-width:1140px;margin:0 auto;padding:0 2rem}
+/* Light section variety — all pale, each distinct */
+.sec      {padding:6rem 0;background:var(--bg-white)}
+.sec-sage {padding:6rem 0;background:var(--bg-sage);border-top:1.5px solid var(--border-soft);border-bottom:1.5px solid var(--border-soft)}
+.sec-ice  {padding:6rem 0;background:var(--bg-ice);border-top:1.5px solid var(--border-sky);border-bottom:1.5px solid var(--border-sky)}
+.sec-cream{padding:6rem 0;background:var(--bg-cream);border-top:1.5px solid var(--border-amb);border-bottom:1.5px solid var(--border-amb)}
+.sec-snow {padding:6rem 0;background:var(--bg-snow);border-top:1.5px solid var(--border-soft);border-bottom:1.5px solid var(--border-soft)}
+/* Vivid sections — mid-tone forest/sky replaces dark sections */
+.sec-vivid{padding:6rem 0;background:var(--vivid-bg);position:relative;overflow:hidden}
+.sec-vivid2{padding:6rem 0;background:var(--vivid-sky);position:relative;overflow:hidden}
+.sec-vivid::before,.sec-vivid2::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:32px 32px;pointer-events:none
+}
+
+/* Labels */
+.lbl    {font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:.6rem}
+.lbl-v  {color:#FFF5B0}          /* on vivid bg */
+.lbl-s  {color:var(--sky-mid)}   /* sky label on light */
+.h2{font-family:'Sora',sans-serif;font-size:clamp(2rem,3.5vw,2.75rem);font-weight:700;letter-spacing:-.025em;color:var(--ink);margin-bottom:.8rem;line-height:1.18}
+.h2-v{color:#FFFFFF}
+.sub{font-size:1.1rem;color:var(--ink-soft);max-width:620px;line-height:1.75;margin-bottom:3rem}
+.sub-v{color:rgba(255,255,255,.78)}
+.tc{text-align:center}.tc .sub{margin-left:auto;margin-right:auto}
+code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--forest-pale);color:var(--forest);padding:1px 7px;border-radius:4px;border:1px solid var(--border)}
+
+/* ── Feature highlight strip ───────────────── */
+.strip{
+  background:var(--forest-pale);border:1.5px solid rgba(14,102,85,.2);
+  border-radius:var(--r-lg);padding:2rem 2.5rem;margin-bottom:3rem;
+  display:flex;align-items:flex-start;gap:1.5rem
+}
+.strip-ico{width:48px;height:48px;border-radius:12px;background:var(--forest);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white}
+.strip-tx h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--forest);margin-bottom:.4rem}
+.strip-tx p{font-size:14px;color:var(--ink-soft);line-height:1.65}
+
+/* ── 3-col feature grid ─────────────────────── */
+.feat3{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.75rem;margin-top:1rem}
+.f3{
+  padding:1.75rem;border-radius:var(--r-lg);
+  background:var(--bg-white);border:1.5px solid var(--border);
+  transition:box-shadow .2s,transform .15s,border-color .2s
+}
+.f3:hover{box-shadow:0 8px 28px rgba(14,102,85,.1);transform:translateY(-3px);border-color:rgba(14,102,85,.3)}
+.f3-ico{width:46px;height:46px;border-radius:11px;background:var(--forest-pale);color:var(--forest);display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.f3-ico.a{background:var(--amber-pale);color:var(--amber)}
+.f3-ico.s{background:var(--sky-pale);color:var(--sky)}
+.f3-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.f3-body{font-size:14px;color:var(--ink-soft);line-height:1.7}
+
+/* ── Module cards ──────────────────────────── */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.25rem}
+.mc{
+  background:var(--bg-white);border:1.5px solid var(--border);
+  border-radius:var(--r-lg);padding:1.75rem;
+  display:flex;flex-direction:column;gap:.9rem;
+  transition:box-shadow .2s,transform .15s,border-color .2s;
+  position:relative;overflow:hidden
+}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--forest),var(--forest-light));opacity:0;transition:opacity .2s}
+.mc:hover{box-shadow:0 8px 32px rgba(14,102,85,.1);transform:translateY(-3px);border-color:rgba(14,102,85,.25)}
+.mc:hover::before{opacity:1}
+.mc.am::before{background:linear-gradient(90deg,var(--amber),var(--amber-light))}
+.mc-hd{display:flex;align-items:flex-start;gap:12px}
+.mc-ico{width:44px;height:44px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--forest-pale);color:var(--forest)}
+.mc-ico.a{background:var(--amber-pale);color:var(--amber)}
+.mc-ico.s{background:var(--sky-pale);color:var(--sky)}
+.mc-name{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);line-height:1.3}
+.mc-flag{font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:20px;display:inline-block;margin-top:3px}
+.fa{background:var(--forest-pale);color:var(--forest)}
+.fo{background:var(--amber-pale);color:var(--amber)}
+.mc-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.mc-pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{font-size:11.5px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--forest-pale);color:var(--forest);border:1px solid rgba(14,102,85,.2)}
+.pill.a{background:var(--amber-pale);color:var(--amber);border-color:rgba(212,130,10,.2)}
+.pill.s{background:var(--sky-pale);color:var(--sky);border-color:rgba(12,122,191,.2)}
+.pill.n{background:var(--bg-sage);color:var(--ink-soft);border-color:var(--border-soft)}
+.mc-foot{font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--muted);border-top:1.5px solid var(--border-soft);padding-top:.65rem;line-height:1.7}
+
+/* ── Use cases ──────────────────────────────── */
+.use-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;margin-top:2rem}
+.use-card{
+  background:var(--bg-white);border:1.5px solid var(--border);
+  border-radius:var(--r-lg);padding:1.75rem;
+  transition:border-color .15s,box-shadow .15s;position:relative;overflow:hidden
+}
+.use-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.use-card.uc1::before{background:linear-gradient(90deg,var(--forest),var(--forest-light))}
+.use-card.uc2::before{background:linear-gradient(90deg,var(--amber),var(--amber-light))}
+.use-card.uc3::before{background:linear-gradient(90deg,var(--sky),var(--sky-light))}
+.use-card:hover{box-shadow:0 8px 28px rgba(14,102,85,.1);border-color:rgba(14,102,85,.25)}
+.use-emoji{font-size:2rem;margin-bottom:.75rem;display:block}
+.use-t{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.use-b{font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:1rem}
+.use-list{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.use-list li{font-size:13px;color:var(--ink-soft);display:flex;align-items:flex-start;gap:7px}
+.use-list li::before{content:'✓';color:var(--forest);font-weight:800;flex-shrink:0}
+
+/* ── How-it-works flow ──────────────────────── */
+.flow-steps{display:flex;flex-direction:column;gap:0;margin-top:2rem;position:relative}
+.flow-steps::before{content:'';position:absolute;left:24px;top:50px;bottom:50px;width:2px;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,250,170,.6) 50%,rgba(255,255,255,.5) 100%)}
+.flow-step{display:flex;gap:1.5rem;padding:1.5rem 0}
+.flow-num{
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);
+  color:white;font-family:'Sora',sans-serif;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1
+}
+.flow-content{flex:1;padding-top:.3rem}
+.flow-t{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:white;margin-bottom:.4rem}
+.flow-b{font-size:14px;color:rgba(255,255,255,.78);line-height:1.7;max-width:700px}
+.flow-b code{background:rgba(255,255,255,.15);color:#FFFAAA;border-color:rgba(255,255,255,.2)}
+.flow-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.15);color:#FFFAAA;border:1px solid rgba(255,255,255,.25);margin-top:.6rem}
+
+/* ── Stack cards ────────────────────────────── */
+.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:1rem;margin-top:2rem}
+.stack-card{
+  background:var(--bg-white);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:1.25rem;
+  transition:border-color .15s,box-shadow .15s
+}
+.stack-card:hover{border-color:rgba(14,102,85,.3);box-shadow:0 4px 16px rgba(14,102,85,.08)}
+.stack-layer{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.4rem}
+.stack-name{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+.stack-ver{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--forest);margin-bottom:.35rem}
+.stack-note{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ── Architecture cards ─────────────────────── */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:2rem}
+@media(max-width:820px){.arch-grid{grid-template-columns:1fr}}
+.arch-card{background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1.75rem;transition:border-color .15s}
+.arch-card:hover{border-color:rgba(14,102,85,.3)}
+.arch-card h3{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:.8rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:600;background:var(--forest-pale);color:var(--forest);padding:2px 9px;border-radius:20px}
+.badge-a{background:var(--amber-pale);color:var(--amber)}
+.badge-s{background:var(--sky-pale);color:var(--sky)}
+.arch-list{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.arch-list li{font-size:13.5px;color:var(--ink-soft);display:flex;align-items:flex-start;gap:8px;line-height:1.55}
+.arch-list li::before{content:'→';color:var(--forest);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ── Event flow ─────────────────────────────── */
+.ef-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-top:2rem;padding:1.5rem 1.75rem;background:var(--bg-sage);border:1.5px solid var(--border);border-radius:var(--r-lg)}
+.ef-node{background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:.6rem 1.1rem;font-size:13px;font-weight:600;color:var(--ink);text-align:center}
+.ef-node.tr{border-color:rgba(14,102,85,.3);background:var(--forest-pale);color:var(--forest)}
+.ef-node.li{border-color:rgba(12,122,191,.25);background:var(--sky-pale);color:var(--sky)}
+.ef-node.ou{border-color:rgba(212,130,10,.3);background:var(--amber-pale);color:var(--amber)}
+.ef-arr{color:var(--muted-lt);font-size:18px;flex-shrink:0}
+
+/* ── CDS cards ───────────────────────────────── */
+.cds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;margin-top:2rem}
+.cds-card{background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1.6rem;transition:box-shadow .2s,border-color .2s}
+.cds-card:hover{box-shadow:0 6px 24px rgba(14,102,85,.1);border-color:rgba(14,102,85,.25)}
+.cds-n{font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;color:var(--forest-pale);line-height:1;margin-bottom:.5rem}
+.cds-t{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:.5rem}
+.cds-b{font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+
+/* ── Deploy code block ──────────────────────── */
+.code-block{
+  background:var(--forest-mist);border:1.5px solid var(--border);
+  border-radius:var(--r-lg);padding:1.75rem 2rem;
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.9;
+  overflow-x:auto;margin:2rem 0;color:var(--ink-mid)
+}
+.cbc{color:var(--forest);font-weight:600}
+.cmt{color:var(--muted-lt);font-style:italic}
+.curl{color:var(--sky)}
+.cstr{color:var(--amber)}
+.ckw{color:var(--forest-mid);font-weight:600}
+.code-head{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1.5px solid var(--border)}
+.cbdot{width:12px;height:12px;border-radius:50%}
+.cb-ttl{font-size:12px;color:var(--muted);letter-spacing:.04em;margin-left:4px}
+
+/* ── Service grid ───────────────────────────── */
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem;margin-top:1.5rem}
+.svc{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.35);border-radius:var(--r-sm);padding:.85rem 1.1rem}
+.sd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sg{background:#80EEA0}.sa{background:#FFDD70}.sb{background:#80D0F0}
+.svc-nm{font-size:13px;font-weight:600;color:white}
+.svc-pt{font-size:11px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,.6);margin-top:1px}
+
+/* ── Steps (deploy) ─────────────────────────── */
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.1rem;margin-top:2.5rem}
+.step{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r-lg);padding:1.6rem;transition:background .15s,border-color .15s}
+.step:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5)}
+.step-n{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#FFFAAA;letter-spacing:.08em;margin-bottom:.75rem;display:block}
+.step-t{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:white;margin-bottom:.45rem}
+.step-b{font-size:13.5px;color:rgba(255,255,255,.72);line-height:1.7}
+
+/* ── SMART steps ─────────────────────────────── */
+.ss-list{display:flex;flex-direction:column;gap:.75rem;margin-top:2rem}
+.ss{display:flex;align-items:flex-start;gap:1.25rem;padding:1.25rem 1.5rem;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:var(--r-lg);transition:background .15s}
+.ss:hover{background:rgba(255,255,255,.22)}
+.ss-num{width:34px;height:34px;border-radius:50%;background:#FFFAAA;color:var(--sky);font-family:'Sora',sans-serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ss-t{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:white;margin-bottom:.35rem}
+.ss-b{font-size:13.5px;color:rgba(255,255,255,.75);line-height:1.65}
+.smart-tech{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:2rem}
+.smt{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:var(--r-sm);padding:1rem 1.2rem}
+.smt-k{font-family:'JetBrains Mono',monospace;font-size:11px;color:#FFFAAA;letter-spacing:.04em;margin-bottom:.4rem}
+.smt-v{font-size:13px;font-weight:600;color:white}
+.smt-s{font-size:11.5px;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* ── Security grid ───────────────────────────── */
+.sec-b-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.1rem;margin-top:2rem}
+.sec-b{display:flex;align-items:flex-start;gap:12px;padding:1.1rem 1.3rem;background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-sm);transition:border-color .15s,box-shadow .15s}
+.sec-b:hover{border-color:rgba(14,102,85,.3);box-shadow:0 4px 14px rgba(14,102,85,.08)}
+.sb-ico{width:36px;height:36px;border-radius:9px;background:var(--forest-pale);color:var(--forest);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-t{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.sb-b{font-size:13px;color:var(--ink-soft);line-height:1.55}
+
+/* ── Nation cards ────────────────────────────── */
+.nation-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.1rem;margin-top:2rem}
+.nc{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.28);border-radius:var(--r-lg);padding:1.5rem;transition:background .15s,border-color .15s}
+.nc:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.45)}
+.nc-flag{font-size:15px;font-weight:700;color:white;margin-bottom:.5rem;display:flex;align-items:center;gap:8px}
+.nc-spec{font-size:12.5px;color:rgba(255,255,255,.65);margin-bottom:.5rem;line-height:1.5}
+.nc-match{font-size:13px;font-weight:600;color:#FFFAAA}
+.nc-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem}
+.nc-tag{font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)}
+
+/* ── Comparison table ─────────────────────────── */
+.cw{overflow-x:auto;margin-top:2rem;border-radius:var(--r-lg);border:1.5px solid var(--border)}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px}
+.cmp th{background:var(--forest);color:white;padding:.85rem 1.2rem;font-family:'Sora',sans-serif;font-weight:600;font-size:13px;text-align:left;white-space:nowrap}
+.cmp th:first-child{border-radius:var(--r-sm) 0 0 0}.cmp th:last-child{border-radius:0 var(--r-sm) 0 0}
+.cmp th.jc{background:var(--amber)}
+.cmp td{padding:.8rem 1.2rem;border-bottom:1px solid var(--border-soft);color:var(--ink-soft);vertical-align:top}
+.cmp tr:last-child td{border-bottom:none}
+.cmp tr:nth-child(even) td{background:var(--bg-sage)}
+.cmp td.jc{background:rgba(14,102,85,.05);font-weight:500;color:var(--ink)}
+.cmp tr:nth-child(even) td.jc{background:rgba(14,102,85,.09)}
+.cmp td:first-child{font-weight:500;color:var(--ink-mid)}
+.ck{color:var(--forest);font-weight:700}.xx{color:var(--coral);font-weight:600}.pt{color:var(--amber);font-weight:600}
+
+/* ── Callout ─────────────────────────────────── */
+.callout{background:var(--forest-pale);border:1.5px solid rgba(14,102,85,.2);border-radius:var(--r-lg);padding:2rem 2.5rem;margin:2.5rem 0;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.callout-ico{width:52px;height:52px;border-radius:14px;background:var(--forest);color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.callout-t h3{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:var(--forest);margin-bottom:.4rem}
+.callout-t p{font-size:14px;color:var(--ink-soft);line-height:1.6}
+.callout-t strong{color:var(--ink-mid)}
+
+/* ── Metrics row ──────────────────────────────── */
+.met-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+.met{background:var(--forest-pale);border:1.5px solid rgba(14,102,85,.2);border-radius:var(--r-sm);padding:.7rem 1.1rem;display:flex;align-items:center;gap:.75rem}
+.met-n{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:var(--forest);line-height:1}
+.met-l{font-size:12px;color:var(--ink-soft)}
+
+/* ── FAQ ─────────────────────────────────────── */
+.faq{display:flex;flex-direction:column;gap:.75rem;max-width:820px;margin-top:2rem}
+.fi{background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .15s}
+.fi:hover{border-color:rgba(14,102,85,.3)}
+.fi summary{font-size:15px;font-weight:600;color:var(--ink);padding:1.15rem 1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;list-style:none;user-select:none}
+.fi summary::-webkit-details-marker{display:none}
+.fi-chev{color:var(--muted);font-size:18px;flex-shrink:0;transition:transform .2s}
+details[open] .fi-chev{transform:rotate(180deg);color:var(--forest)}
+.fi-ans{font-size:14.5px;color:var(--ink-soft);line-height:1.75;padding:0 1.5rem 1.3rem}
+
+/* ── Support tiers ────────────────────────────── */
+.sup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;margin-top:2rem}
+.sup{background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:1.75rem;position:relative;transition:border-color .15s,box-shadow .15s}
+.sup:hover{border-color:rgba(14,102,85,.3);box-shadow:0 4px 18px rgba(14,102,85,.1)}
+.sup.rec{border-color:var(--amber);box-shadow:0 4px 24px rgba(212,130,10,.18)}
+.sup-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--amber);color:white;font-size:11px;font-weight:800;padding:3px 14px;border-radius:20px;white-space:nowrap}
+.sup-tier{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+.sup-price{font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:1.25rem}
+.sup-ul{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.sup-ul li{font-size:13.5px;color:var(--ink-soft);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.sup-ul li::before{content:'✓';color:var(--forest);font-weight:800;flex-shrink:0;margin-top:1px}
+
+/* ── Footer — forest vivid ────────────────────── */
+.foot{
+  background:var(--vivid-bg);
+  border-top:1.5px solid rgba(255,255,255,.12);
+  padding:4.5rem 0 2.5rem
+}
+.foot-grid{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+@media(max-width:900px){.foot-grid{grid-template-columns:1fr 1fr;gap:2rem}}
+@media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
+.foot-brand{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:white;display:flex;align-items:center;gap:9px;margin-bottom:.9rem}
+.foot-brand-ico{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}
+.foot-tag{font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.7;max-width:280px}
+.foot-col-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1rem}
+.foot-links{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+.foot-links a{font-size:14px;color:rgba(255,255,255,.65);text-decoration:none;transition:color .12s}
+.foot-links a:hover{color:white}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.12);padding-top:1.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+.foot-copy{font-size:13px;color:rgba(255,255,255,.4)}
+.foot-stack{display:flex;gap:12px;flex-wrap:wrap}
+.foot-stack span{font-size:12px;color:rgba(255,255,255,.3)}
+
+/* ── Responsive ───────────────────────────────── */
+@media(max-width:768px){.hide-mob{display:none}.hero-h1{font-size:2.5rem}.st{padding:1rem 1.5rem}}
+@media(max-width:520px){.nav{padding:0 1rem}.hero{padding:4.5rem 1rem 3.5rem}.wrap{padding:0 1rem}.hero-btns{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<!-- ── Announcement bar ── -->
+<div class="ann">
+  <span class="ann-pip"></span>
+  Jam EMR v1.0 — 16 clinical modules, FHIR R4 native, MIT licensed.
+  <a href="#deploy">Deploy with one command →</a>
+</div>
+
+<!-- ── Navbar ── -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <div class="nav-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <span class="nav-name">Jam <span>EMR</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#why" class="hide-mob">Why Jam</a></li>
+    <li><a href="#modules" class="hide-mob">Modules</a></li>
+    <li><a href="#stack" class="hide-mob">Stack</a></li>
+    <li><a href="#smart" class="hide-mob">SMART</a></li>
+    <li><a href="#compare" class="hide-mob">Compare</a></li>
+    <li><a href="https://github.com/vedpr625/FHIR-Electronic-Medical-Records" class="nav-ghost hide-mob" target="_blank">GitHub</a></li>
+    <li><a href="#deploy" class="nav-pill">Get started →</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-glow2"></div>
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Open source · FHIR R4 native · MIT licensed</div>
+    <h1 class="hero-h1">The EMR where<br/><span class="ga">every record</span><br/>is a <span class="gt">FHIR resource</span></h1>
+    <p class="hero-sub">Jam EMR is the only open source clinical system that stores patient data <strong>natively as FHIR R4</strong> — not translated, not wrapped, not exported. 16 clinical modules, SMART on FHIR v2, DHIS2 national reporting, and a complete insurance revenue cycle. Runs anywhere with one Docker command.</p>
+    <div class="hero-btns">
+      <a class="btn-forest" href="#deploy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Deploy in 60 seconds</a>
+      <a class="btn-sky" href="https://github.com/vedpr625/FHIR-Electronic-Medical-Records" target="_blank"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>View on GitHub</a>
+      <a class="btn-outline" href="#compare">See comparison →</a>
+    </div>
+    <div class="trust">
+      <span class="trust-lbl">Aligned with</span>
+      <span class="tbadge">HL7 FHIR R4</span>
+      <span class="tbadge">SMART App Launch v2</span>
+      <span class="tbadge">HAPI FHIR 7</span>
+      <span class="tbadge">WHO DHIS2</span>
+      <span class="tbadge">PEPFAR DATIM</span>
+      <span class="tbadge">IHE ATNA</span>
+      <span class="tbadge">Spring Modulith</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats bar ── -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="st"><span class="st-n">188</span><span class="st-l">Java source files</span></div>
+    <div class="st"><span class="st-n">128</span><span class="st-l">Thymeleaf templates</span></div>
+    <div class="st"><span class="st-n">16</span><span class="st-l">Clinical modules</span></div>
+    <div class="st"><span class="st-n">27</span><span class="st-l">FHIR R4 resource types</span></div>
+    <div class="st"><span class="st-n">138</span><span class="st-l">Audit log call sites</span></div>
+    <div class="st"><span class="st-n">MIT</span><span class="st-l">Open source licence</span></div>
+  </div>
+</div>
+
+<!-- ── Why Jam ── -->
+<section class="sec-sage" id="why">
+  <div class="wrap">
+    <div class="lbl">The Jam EMR difference</div>
+    <h2 class="h2">Built FHIR-first — not FHIR-adapted</h2>
+    <p class="sub">Every other open source EMR stores clinical data in a proprietary schema and adds a FHIR facade on top. Jam EMR uses HAPI FHIR JPA as its <em>only</em> database — giving you a fully interoperable system from day one, with zero translation overhead.</p>
+    <div class="strip">
+      <div class="strip-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+      <div class="strip-tx">
+        <h3>HAPI FHIR JPA R4 is the one and only database</h3>
+        <p>Patients are <code>Patient</code> resources. Prescriptions are <code>MedicationRequest</code> resources. Invoices are <code>Invoice</code> resources. Query the standard FHIR API directly at <code>http://localhost:8090/fhir</code> — no custom endpoints, no wrappers, no second database to manage. Any FHIR-capable system integrates from day one.</p>
+      </div>
+    </div>
+    <div class="feat3">
+      <div class="f3"><div class="f3-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div><div class="f3-title">27 FHIR R4 resource types — all native storage</div><div class="f3-body">From <code>Patient</code> and <code>Encounter</code> to <code>Coverage</code>, <code>Claim</code>, <code>ClaimResponse</code>, and <code>AuditEvent</code> — the entire clinical and financial workflow expressed in standard FHIR. Any FHIR-capable system integrates directly. No custom adapter work, ever.</div></div>
+      <div class="f3"><div class="f3-ico a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div class="f3-title">16 Spring Modulith modules — verified every build</div><div class="f3-body">Declared <code>allowedDependencies</code> verified by <code>ModularStructureTest</code> on every Maven build. Cycle-free. Feature-flagged with <code>@ConditionalOnProperty</code> — turn off what you don't need for zero startup cost.</div></div>
+      <div class="f3"><div class="f3-ico s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="f3-title">Event-driven CDS — modules talk without coupling</div><div class="f3-body">7 Spring application events connect modules without imports: <code>VitalsSavedEvent</code> triggers NEWS2, <code>MedicationSavedEvent</code> triggers drug-allergy, <code>CriticalResultEvent</code> surfaces alerts. Each is a typed Java record — impossible to send the wrong payload.</div></div>
+      <div class="f3"><div class="f3-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="f3-title">Caffeine-cached dashboard — instant page loads</div><div class="f3-body">Nine HAPI queries fire in parallel via <code>CompletableFuture</code>, cached for 60 seconds with a 200-entry maximum. The dashboard is always fast — even on large datasets with thousands of patients and encounters.</div></div>
+      <div class="f3"><div class="f3-ico a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="f3-title">iText 7 PDF generation — stored as FHIR DocumentReference</div><div class="f3-body">Prescription PDFs and patient summaries generated with iText 7, stored as FHIR <code>DocumentReference</code> resources with LOINC codes <code>57833-6</code> and <code>60591-5</code>. Every printable document is also a queryable FHIR resource.</div></div>
+      <div class="f3"><div class="f3-ico s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div><div class="f3-title">FHIR Questionnaire forms engine — zero code for custom forms</div><div class="f3-body">Build intake forms and screening tools using <code>Questionnaire</code> + <code>QuestionnaireResponse</code> with group nesting, conditional logic, LOINC codes per item, and all FHIR item types. No Java required.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Use cases ── -->
+<section class="sec" id="usecases">
+  <div class="wrap">
+    <div class="lbl lbl-s">Who deploys Jam EMR</div>
+    <h2 class="h2">The right fit for every clinical setting</h2>
+    <p class="sub">From a single-doctor outpatient clinic to a 200-bed district hospital reporting to a national HMIS — Jam EMR scales with your organisation and grows with your needs.</p>
+    <div class="use-grid">
+      <div class="use-card uc1"><span class="use-emoji">🏥</span><div class="use-t">Outpatient clinic</div><div class="use-b">Start with the core clinical record and appointment queue. Add billing and insurance when ready — no reinstall, no migration, just flip a feature flag.</div><ul class="use-list"><li>Patient registry + encounter notes from day one</li><li>Appointment queue with public TV waiting-room display</li><li>Prescriptions, LOINC vitals, ICD-10 conditions</li><li>PDF prescription printing and patient summaries</li><li>Full FHIR insurance claim cycle when needed</li></ul></div>
+      <div class="use-card uc2"><span class="use-emoji">🏨</span><div class="use-t">District hospital</div><div class="use-b">Enable inpatient, paediatrics, radiology, ANC, HIV, and STD modules. SMART on FHIR v2 launches from your existing HIS. NEWS2 and drug-allergy CDS protect patients around the clock.</div><ul class="use-list"><li>IPD ward rounds with SOAP notes and inline vitals</li><li>DICOM imaging via Orthanc PACS + OHIF Viewer 3</li><li>WHO growth charts and EPI vaccination schedules</li><li>HIV ART programme with PEPFAR reporting ready</li><li>NEWS2 early warning on every vitals save</li></ul></div>
+      <div class="use-card uc3"><span class="use-emoji">🌍</span><div class="use-t">National health programme</div><div class="use-b">Configure DHIS2 data element UIDs once and the reporting module handles the rest. PEPFAR DATIM UIDs pre-configured. Six national HMIS endpoints documented and tested.</div><ul class="use-list"><li>OPD, malaria, TB, NCD, EPI indicators built in</li><li>DHIS2 dataValueSet POST or HMIS CSV download</li><li>PEPFAR TX_CURR, TX_NEW, HTS_TST, HTS_POS</li><li>Age/sex disaggregation via categoryOptionCombo</li><li>Multi-facility deployment via Docker Compose</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Modules ── -->
+<section class="sec-ice" id="modules">
+  <div class="wrap">
+    <div class="lbl">Clinical modules</div>
+    <h2 class="h2">Everything your clinic needs. Only what you turn on.</h2>
+    <p class="sub">Feature flags via <code>@ConditionalOnProperty</code> mean unused modules never start. Configure once in Docker Compose; override any flag per environment with a single environment variable.</p>
+    <div class="mod-grid">
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="mc-name">Patient Registry + Full Clinical Record</div><span class="mc-flag fa">Always active</span></div></div><div class="mc-desc">Complete clinical timeline: encounters with SOAP notes, allergies with severity grading, ICD-10 conditions, LOINC-coded vitals, MedicationRequest prescriptions, CVX-coded immunisations, diagnostic reports, procedures, family history, and documents. MRN, blood group, emergency contacts as FHIR extensions.</div><div class="mc-pills"><span class="pill">Patient</span><span class="pill">Encounter</span><span class="pill">Condition</span><span class="pill">MedicationRequest</span><span class="pill">Observation</span><span class="pill">Immunization</span></div><div class="mc-foot">Vitals: 8310-5 temp · 8867-4 HR · 85354-9 BP · 29463-7 weight · 8302-2 height · 2708-6 SpO₂</div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="mc-name">Appointments + Practice Queue</div><span class="mc-flag fa">Always active</span></div></div><div class="mc-desc">7-day calendar view, per-practitioner queues with sequential token assignment, receptionist check-in / call / no-show / undo flow, and a public TV display at <code>/queue/display/</code> — no auth required, designed for lobby screens. Lifecycle: proposed → booked → arrived → fulfilled → cancelled.</div><div class="mc-pills"><span class="pill">Appointment</span><span class="pill">Queue tokens</span><span class="pill">TV display</span><span class="pill">Check-in flow</span></div></div>
+      <div class="mc am"><div class="mc-hd"><div class="mc-ico a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="mc-name">Billing + Full Insurance Revenue Cycle</div><span class="mc-flag fo">emr.modules.billing · emr.modules.insurance</span></div></div><div class="mc-desc">FHIR-native revenue cycle, three phases complete. Phase 1: Coverage + InsurancePlan catalogue, primary/secondary ordering. Phase 2: Claim generation from Invoice — pre-tax lines, duplicate-claim guard, draft → submit → void. Phase 3: ClaimResponse adjudication, automatic Invoice reconciliation with gap invoicing.</div><div class="mc-pills"><span class="pill a">Coverage</span><span class="pill a">InsurancePlan</span><span class="pill a">Claim</span><span class="pill a">ClaimResponse</span><span class="pill a">Invoice</span></div><div class="mc-foot">5 claim-tracking extensions on Invoice keep billing and insurance modules fully independent</div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 0-2-2V9m0 0h18"/></svg></div><div><div class="mc-name">Inpatient — Beds, Ward Rounds, Discharge</div><span class="mc-flag fo">emr.modules.ipd</span></div></div><div class="mc-desc">Ward dashboard with live bed-status grid, bed management (FHIR Location), admissions (EpisodeOfCare), SOAP ward-round notes with inline vitals, patient transfer, discharge with disposition coding. Bed lifecycle: Available → Occupied → Housekeeping → Available.</div><div class="mc-pills"><span class="pill">EpisodeOfCare</span><span class="pill">Location</span><span class="pill">SOAP rounds</span><span class="pill">Discharge</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><div class="mc-name">Clinical Decision Support</div><span class="mc-flag fo">emr.modules.cds</span></div></div><div class="mc-desc">Drug-allergy checker with three-level matching (exact SNOMED → display overlap → drug class cross-reactivity). Fires asynchronously on every prescription save. NEWS2 (National Early Warning Score 2) fires on every vitals save, stored as FHIR RiskAssessment. Both create persistent DetectedIssue alerts on the patient chart.</div><div class="mc-pills"><span class="pill s">DetectedIssue</span><span class="pill s">RiskAssessment</span><span class="pill s">NEWS2 (0–20)</span><span class="pill s">3-level allergy</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg></div><div><div class="mc-name">HIV / ART Programme</div><span class="mc-flag fo">emr.modules.hiv</span></div></div><div class="mc-desc">Complete ART programme: enrolment (EpisodeOfCare), viral load and CD4 trend observations, WHO clinical staging, regimen prescribing and switching. All routes require ROLE_HIV_PROVIDER via @PreAuthorize — enforced at the service layer so protection holds in every security mode.</div><div class="mc-pills"><span class="pill">ART regimens</span><span class="pill">Viral load trends</span><span class="pill">WHO staging</span><span class="pill n">Role-gated</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="mc-name">Paediatrics + WHO Growth Monitoring</div><span class="mc-flag fo">emr.modules.paediatrics</span></div></div><div class="mc-desc">Age guard on registration. WHO growth monitoring with z-scores: WAZ, HAZ, WHZ, MUAC. Interactive Chart.js growth charts. WHO EPI vaccination schedule with due/overdue/given status per antigen. Weight-based dosing calculator with dose capping and age-band validation.</div><div class="mc-pills"><span class="pill">WAZ/HAZ/WHZ z-scores</span><span class="pill">WHO EPI schedule</span><span class="pill">Dosing calculator</span></div></div>
+      <div class="mc am"><div class="mc-hd"><div class="mc-ico a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div><div><div class="mc-name">National Reporting + DHIS2 / DATIM Export</div><span class="mc-flag fa">Always active</span></div></div><div class="mc-desc">FHIR-to-analytics ETL (nightly 2 AM or manual trigger), 7 operational reports. Aggregates OPD, malaria (ICD-10 B50–B54), TB (A15–A19), NCDs (I10–I15, E10–E14), and EPI vaccine doses by CVX code. Exports as DHIS2 dataValueSet JSON, PEPFAR DATIM, or HMIS CSV flat file.</div><div class="mc-pills"><span class="pill a">DHIS2 dataValueSet</span><span class="pill a">PEPFAR DATIM</span><span class="pill a">HMIS CSV</span><span class="pill a">7 reports</span></div><div class="mc-foot">TX_CURR · TX_NEW · HTS_TST · HTS_POS — PEPFAR MER UIDs pre-configured</div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div><div><div class="mc-name">Radiology + PACS Integration</div><span class="mc-flag fo">emr.modules.imaging</span></div></div><div class="mc-desc">FHIR ImagingStudy resources, radiology order workflow, Orthanc PACS integration via DICOMweb (WADO-RS, STOW-RS, QIDO-RS), and OHIF Viewer 3 launch links for browser-based DICOM viewing — no separate viewer login required.</div><div class="mc-pills"><span class="pill s">ImagingStudy</span><span class="pill s">ServiceRequest</span><span class="pill s">Orthanc PACS</span><span class="pill s">OHIF Viewer 3</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4.97 0-9-2.69-9-6v-7l9-5 9 5v7c0 3.31-4.03 6-9 6z"/></svg></div><div><div class="mc-name">ANC · Gynaecology · Sexual Health</div><span class="mc-flag fo">Three flags — deploy only what applies</span></div></div><div class="mc-desc">ANC follows WHO 8-contact model with gestational age, fundal height, FHR, urinalysis, and PMTCT status. Gynaecology covers Pap smear with Bethesda classification. STD module: FHIR security labels, <code>Cache-Control: no-store</code> on all <code>/std/**</code> responses, ICD-10 A50–A64 hidden from general lists.</div><div class="mc-pills"><span class="pill">WHO ANC 8-contact</span><span class="pill">Bethesda</span><span class="pill n">FHIR security labels</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div><div class="mc-name">Dynamic Forms + Questionnaires</div><span class="mc-flag fo">emr.modules.forms</span></div></div><div class="mc-desc">Build custom clinical forms using FHIR Questionnaire — intake assessments, screening tools, consent forms. All FHIR item types: string, integer, decimal, boolean, choice, group with nested items, enableWhen conditional logic, LOINC linkId per item. Responses stored as QuestionnaireResponse resources.</div><div class="mc-pills"><span class="pill">Questionnaire</span><span class="pill">QuestionnaireResponse</span><span class="pill">enableWhen</span></div></div>
+      <div class="mc"><div class="mc-hd"><div class="mc-ico s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><div class="mc-name">SMART on FHIR App Launch v2.0</div><span class="mc-flag fo">emr.security.mode=smart</span></div></div><div class="mc-desc">Complete SMART App Launch v2.0: PKCE S256 with 96-byte verifier, RS256 id_token validation via Nimbus JOSE+JWT against RemoteJWKSet, proactive token refresh 120s before expiry, session fixation protection. Launches from Epic, Cerner, and any SMART v2-compliant EHR.</div><div class="mc-pills"><span class="pill s">PKCE S256</span><span class="pill s">RS256 JWT</span><span class="pill s">Token refresh</span><span class="pill s">Epic · Cerner</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works — vivid forest ── -->
+<section class="sec-vivid" id="howitworks">
+  <div class="wrap">
+    <div class="lbl lbl-v">How it works</div>
+    <h2 class="h2 h2-v">From patient registration to national report — every step in FHIR</h2>
+    <p class="sub sub-v">Jam EMR's clinical workflow is a continuous chain of FHIR resources. Every action creates or updates a resource that is immediately queryable, auditable, and interoperable.</p>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-t">Patient arrives — a FHIR Patient resource is created</div><div class="flow-b">The receptionist registers the patient. Jam EMR creates a <code>Patient</code> resource in HAPI FHIR JPA with demographics, MRN as <code>identifier</code>, blood group and emergency contacts as extensions. <code>PatientCreatedEvent</code> fires. The patient is instantly searchable by name, MRN, phone, or any FHIR search parameter.</div><div class="flow-badge">FHIR: Patient · Identifier · AuditEvent</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-t">Appointment booked — token assigned, queue updated live</div><div class="flow-b">An <code>Appointment</code> resource is created and a queue token assigned. Check-in sets status to <code>arrived</code>. The practitioner calls the patient — <code>calledAt</code> recorded. The TV display at <code>/queue/display/</code> updates in real time — no auth required, designed for lobby screens.</div><div class="flow-badge">FHIR: Appointment · status lifecycle</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="flow-t">Encounter opened — all clinical records attach to it</div><div class="flow-b">The doctor opens an <code>Encounter</code> (class: AMB / IMP / EMER). All clinical actions — vitals, conditions, prescriptions, investigations — reference this encounter. <code>EncounterCreatedEvent</code> fires. The encounter timeline is the canonical record for the visit.</div><div class="flow-badge">FHIR: Encounter · Condition · Observation</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="flow-t">Vitals saved — NEWS2 fires automatically, no trigger needed</div><div class="flow-b">Vitals stored as FHIR <code>Observation</code> resources with standard LOINC codes. <code>VitalsSavedEvent</code> fires asynchronously. <code>News2Calculator</code> computes the NEWS2 score (0–20) and stores a <code>RiskAssessment</code>. Elevated scores log a CDS audit event. The practitioner sees the score on next page load.</div><div class="flow-badge">FHIR: Observation · RiskAssessment · AuditEvent</div></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><div class="flow-t">Prescription written — drug-allergy check runs immediately</div><div class="flow-b">A <code>MedicationRequest</code> is created. <code>MedicationSavedEvent</code> fires. <code>DrugAllergyChecker</code> runs three-level matching: exact SNOMED → display name overlap → drug class cross-reactivity. A <code>DetectedIssue</code> is stored and shown as a banner on the chart if a conflict is found.</div><div class="flow-badge">FHIR: MedicationRequest · DetectedIssue · AllergyIntolerance</div></div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="flow-t">Invoice generated — insurance claim submitted and reconciled</div><div class="flow-b">Billing generates a FHIR <code>Invoice</code> with <code>ChargeItemDefinition</code> line items. A <code>Claim</code> is generated with pre-tax <code>item[].net</code> values. The insurer's remittance creates a <code>ClaimResponse</code>. <code>reconcileInvoice()</code> updates <code>patientOwes</code> and marks the invoice <code>balanced</code>. Gap invoicing keeps the invoice open if the patient owes a remainder.</div><div class="flow-badge">FHIR: Invoice · Coverage · Claim · ClaimResponse</div></div></div>
+      <div class="flow-step"><div class="flow-num">7</div><div class="flow-content"><div class="flow-t">ETL runs — national indicators submitted to DHIS2 automatically</div><div class="flow-b">The ETL reads FHIR resources and populates the analytics database. <code>NationalIndicatorService</code> aggregates OPD, malaria (B50–B54), TB, EPI doses, and PEPFAR HIV indicators. <code>Dhis2ExportService</code> POSTs a <code>dataValueSet</code> JSON to your DHIS2 instance, or produces a CSV for manual upload.</div><div class="flow-badge">Reporting: DHIS2 dataValueSet · DATIM · HMIS CSV</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Technical architecture ── -->
+<section class="sec-sage" id="technical">
+  <div class="wrap">
+    <div class="lbl">Technical architecture</div>
+    <h2 class="h2">Engineered for correctness, built to last</h2>
+    <p class="sub">Every design decision in Jam EMR has a documented reason. Here are the decisions that matter most in a clinical system.</p>
+    <div class="arch-grid">
+      <div class="arch-card"><h3>FHIR storage layer <span class="badge">HAPI FHIR 7</span></h3><ul class="arch-list"><li>HAPI FHIR JPA R4 backed by PostgreSQL 15-alpine</li><li>Full FHIR search indexing on every resource type</li><li>Version history preserved — no hard deletes in clinical workflow</li><li>Connection pool: max 10/route, 50 total, 30s connect / 60s socket timeout</li><li>Reporting ETL writes to isolated <code>reporting</code> schema via <code>@Qualifier("reportingTx")</code></li><li>Secondary EntityManagerFactory — reporting DB fully isolated from HAPI</li></ul></div>
+      <div class="arch-card"><h3>Spring Modulith <span class="badge">Build-time verified</span></h3><ul class="arch-list"><li>16 packages each with <code>package-info.java</code> declaring <code>allowedDependencies</code></li><li><code>ModularStructureTest.verifiesModularStructure()</code> fails the build on any violation</li><li>Internal DTOs in <code>internal/</code> packages — inaccessible cross-module</li><li>Cross-module communication via Spring application events only</li><li><code>@ApplicationModuleListener</code> on CDS and contact-tracing listeners</li><li><code>@ConditionalOnProperty</code> on every feature-flagged module's beans</li></ul></div>
+      <div class="arch-card"><h3>Insurance revenue cycle <span class="badge badge-a">FHIR-native</span></h3><ul class="arch-list"><li><code>Coverage.payor[]</code> → Organization (insurer) — no separate insurer entity</li><li><code>Claim.item[].net</code> = pre-tax subtotal (insurers don't pay VAT/GST)</li><li>5 claim-tracking extensions on Invoice keep billing and insurance modules decoupled</li><li><code>ClaimResponseService.reconcileInvoice()</code> is idempotent — safe to call twice</li><li>Gap invoicing: if patientOwes > 0, Invoice stays <code>issued</code> for cash collection</li><li><code>Coverage.class[]</code> uses standard <code>coverage-class</code> CodeSystem for plan/group</li></ul></div>
+      <div class="arch-card"><h3>Security hardening <span class="badge badge-s">Production-ready</span></h3><ul class="arch-list"><li>HTTP headers: CSP, X-Frame-Options: DENY, Referrer-Policy: strict-origin, Permissions-Policy</li><li>HSTS in smart mode (requires HTTPS); skipped in development to avoid breaking HTTP</li><li>Global <code>@ControllerAdvice</code> strips HAPI URLs, JDBC strings, stack traces from browser</li><li>Patient deactivate is POST (CSRF-protected) — prevents link-based data loss</li><li>Caffeine cache: 60s TTL, max 200 entries — no unbounded memory growth</li><li>Actuator: only <code>health</code> and <code>info</code> exposed — <code>env</code> never accessible</li></ul></div>
+    </div>
+    <div class="callout">
+      <div class="callout-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="callout-t"><h3>7 clinical application events — modules that talk without coupling</h3><p><strong>CriticalResultEvent</strong>, <strong>VitalsSavedEvent</strong> (triggers NEWS2), <strong>MedicationSavedEvent</strong> (triggers drug-allergy), <strong>StdDiagnosisConfirmedEvent</strong> (triggers contact-tracing), <strong>PregnancyRegisteredEvent</strong>, <strong>EncounterCreatedEvent</strong>, <strong>PatientCreatedEvent</strong>. Each is a typed Java record — no stringly-typed payloads, no runtime surprises.</p></div>
+    </div>
+    <div class="ef-wrap">
+      <div class="ef-node tr">VitalsSavedEvent</div><div class="ef-arr">→</div><div class="ef-node li">News2Calculator</div><div class="ef-arr">→</div><div class="ef-node ou">RiskAssessment (FHIR)</div>
+      <div style="flex-basis:100%;height:0"></div>
+      <div class="ef-node tr">MedicationSavedEvent</div><div class="ef-arr">→</div><div class="ef-node li">DrugAllergyChecker</div><div class="ef-arr">→</div><div class="ef-node ou">DetectedIssue (FHIR)</div>
+      <div style="flex-basis:100%;height:0"></div>
+      <div class="ef-node tr">StdDiagnosisConfirmedEvent</div><div class="ef-arr">→</div><div class="ef-node li">ContactTracingService</div><div class="ef-arr">→</div><div class="ef-node ou">RelatedPerson (FHIR)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Technology stack ── -->
+<section class="sec-cream" id="stack">
+  <div class="wrap">
+    <div class="lbl lbl-s">Technology stack</div>
+    <h2 class="h2">Proven, well-supported, battle-tested</h2>
+    <p class="sub">Every dependency is a deliberate choice — maintained by large organisations, widely deployed in healthcare, and stable enough to build a clinical system on.</p>
+    <div class="stack-grid">
+      <div class="stack-card"><div class="stack-layer">Runtime</div><div class="stack-name">Java 17</div><div class="stack-ver">LTS · Eclipse Temurin</div><div class="stack-note">Long-term support. Runs on any JVM — bare metal, Docker, or cloud VM.</div></div>
+      <div class="stack-card"><div class="stack-layer">Framework</div><div class="stack-name">Spring Boot</div><div class="stack-ver">3.2.0</div><div class="stack-note">Auto-configuration, dependency injection, Security, Scheduling. The industry standard for Java services.</div></div>
+      <div class="stack-card"><div class="stack-layer">FHIR engine</div><div class="stack-name">HAPI FHIR</div><div class="stack-ver">7.0.0 · JPA R4</div><div class="stack-note">The dominant open-source FHIR implementation on the JVM. Used in Epic integrations worldwide.</div></div>
+      <div class="stack-card"><div class="stack-layer">Database</div><div class="stack-name">PostgreSQL</div><div class="stack-ver">15-alpine (Docker)</div><div class="stack-note">HAPI FHIR JPA's primary store. H2 in-memory for development without Docker.</div></div>
+      <div class="stack-card"><div class="stack-layer">Architecture</div><div class="stack-name">Spring Modulith</div><div class="stack-ver">1.1.0</div><div class="stack-note">Build-time boundary verification. Module allowedDependencies enforced on every Maven build.</div></div>
+      <div class="stack-card"><div class="stack-layer">Templates</div><div class="stack-name">Thymeleaf</div><div class="stack-ver">3.x · 128 templates</div><div class="stack-note">Server-side rendering. Works without JavaScript. Accessible, SEO-friendly clinical UI.</div></div>
+      <div class="stack-card"><div class="stack-layer">PDF generation</div><div class="stack-name">iText 7</div><div class="stack-ver">7.2.5</div><div class="stack-note">Prescriptions, summaries, invoices — stored as FHIR DocumentReference with LOINC codes.</div></div>
+      <div class="stack-card"><div class="stack-layer">SMART / JWT</div><div class="stack-name">Nimbus JOSE+JWT</div><div class="stack-ver">9.40</div><div class="stack-note">RS256 id_token validation against RemoteJWKSet. Full PKCE and nonce verification.</div></div>
+      <div class="stack-card"><div class="stack-layer">Cache</div><div class="stack-name">Caffeine</div><div class="stack-ver">3.x · 60s TTL</div><div class="stack-note">Bounded cache with TTL eviction. Prevents unbounded memory growth on high-traffic deployments.</div></div>
+      <div class="stack-card"><div class="stack-layer">PACS</div><div class="stack-name">Orthanc</div><div class="stack-ver">latest · DICOMweb</div><div class="stack-note">Open-source DICOM server. WADO-RS, STOW-RS, QIDO-RS. Paired with OHIF Viewer 3.</div></div>
+      <div class="stack-card"><div class="stack-layer">DICOM Viewer</div><div class="stack-name">OHIF Viewer 3</div><div class="stack-ver">React · DICOMweb</div><div class="stack-note">Browser-based DICOM viewer. No plugin, no install. Launched directly from radiology orders.</div></div>
+      <div class="stack-card"><div class="stack-layer">Reporting</div><div class="stack-name">DHIS2 Web API</div><div class="stack-ver">v2.36+ · dataValueSet</div><div class="stack-note">Aggregated indicators to national HMIS. Any DHIS2 v2.36+ instance worldwide.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CDS ── -->
+<section class="sec">
+  <div class="wrap">
+    <div class="lbl lbl-s">Clinical decision support</div>
+    <h2 class="h2">Safety checks that run before harm reaches the patient</h2>
+    <p class="sub">Jam EMR's CDS layer is embedded in the prescription and vitals workflow — not bolted on as an afterthought. Two systems fire automatically with zero configuration required.</p>
+    <div class="cds-grid">
+      <div class="cds-card"><div class="cds-n">3×</div><div class="cds-t">Drug-allergy matching levels</div><div class="cds-b">Level 1: exact SNOMED code. Level 2: display name word overlap. Level 3: drug class cross-reactivity — prescribing amoxicillin is blocked when a penicillin allergy is recorded. Fires asynchronously on every MedicationRequest save. Persistent FHIR DetectedIssue alerts surface on the chart.</div></div>
+      <div class="cds-card"><div class="cds-n">0–20</div><div class="cds-t">NEWS2 early warning score</div><div class="cds-b">NHS National Early Warning Score 2 calculated on every vitals save. Scores respiratory rate, SpO₂, systolic BP, heart rate, temperature, and consciousness. Elevated scores log a CDS audit event and store a FHIR RiskAssessment. Zero configuration — activates automatically on any vital sign save.</div></div>
+      <div class="cds-card"><div class="cds-n">138</div><div class="cds-t">Audit log call sites — every action recorded</div><div class="cds-b">Every CREATE, UPDATE, DELETE, and CDS-ALERT across all 16 modules written as a FHIR AuditEvent asynchronously via <code>@Async("taskExecutor")</code>. Audit writes never block the HTTP request thread. If HAPI is slow, clinical operations complete normally.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Deploy — vivid forest ── -->
+<section class="sec-vivid" id="deploy">
+  <div class="wrap">
+    <div class="lbl lbl-v">Quick start</div>
+    <h2 class="h2 h2-v">A fully configured clinical environment in under two minutes</h2>
+    <p class="sub sub-v">Docker Compose launches HAPI FHIR JPA, Orthanc PACS, OHIF Viewer 3, and the Jam EMR app — all networked, all configured, all ready. No FHIR expertise required to get started.</p>
+    <div class="code-block">
+      <div class="code-head">
+        <div class="cbdot" style="background:#FF7B72"></div>
+        <div class="cbdot" style="background:#F8C555"></div>
+        <div class="cbdot" style="background:#3FB950"></div>
+        <span class="cb-ttl">Terminal</span>
+      </div>
+<span class="cmt"># Clone and start</span>
+<span class="cbc">git clone</span> <span class="curl">https://github.com/vedpr625/FHIR-Electronic-Medical-Records</span>
+<span class="cbc">cd</span> FHIR-Electronic-Medical-Records
+<span class="cbc">docker compose up -d</span>
+
+<span class="cmt"># Wait ~45s for HAPI to initialise, then open</span>
+<span class="cbc">open</span> <span class="curl">http://localhost:8080</span>           <span class="cmt"># Jam EMR</span>
+<span class="cbc">open</span> <span class="curl">http://localhost:8090/fhir</span>      <span class="cmt"># HAPI FHIR R4 API</span>
+<span class="cbc">open</span> <span class="curl">http://localhost:8042</span>           <span class="cmt"># Orthanc PACS</span>
+<span class="cbc">open</span> <span class="curl">http://localhost:3000</span>           <span class="cmt"># OHIF Viewer 3</span>
+
+<span class="cmt"># Configure via environment variables — no config files to edit</span>
+<span class="ckw">FHIR_SERVER_URL</span>=<span class="cstr">http://your-hapi/fhir</span>
+<span class="ckw">EMR_MODULES_HIV</span>=<span class="cstr">true</span>
+<span class="ckw">DHIS2_URL</span>=<span class="cstr">https://hmis.health.gov.ke</span>
+<span class="ckw">SPRING_SECURITY_USER_PASSWORD</span>=<span class="cstr">your-secure-password</span></div>
+    <div class="svc-grid">
+      <div class="svc"><div class="sd sg"></div><div><div class="svc-nm">Jam EMR</div><div class="svc-pt">:8080 · Spring Boot 3.2 · Java 17</div></div></div>
+      <div class="svc"><div class="sd sg"></div><div><div class="svc-nm">HAPI FHIR JPA R4</div><div class="svc-pt">:8090 · PostgreSQL 15-alpine</div></div></div>
+      <div class="svc"><div class="sd sa"></div><div><div class="svc-nm">Orthanc PACS</div><div class="svc-pt">:8042 · DICOMweb · DICOM :4242</div></div></div>
+      <div class="svc"><div class="sd sb"></div><div><div class="svc-nm">OHIF Viewer 3</div><div class="svc-pt">:3000 · React · WADO-RS</div></div></div>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="step-n">01 — CONFIGURE</span><div class="step-t">Set environment variables</div><div class="step-b">Override FHIR_SERVER_URL, security credentials, and DHIS2 UID mappings via env vars. No YAML to edit.</div></div>
+      <div class="step"><span class="step-n">02 — ACTIVATE</span><div class="step-t">Enable the modules you need</div><div class="step-b">EMR_MODULES_HIV=true, EMR_MODULES_PAEDIATRICS=true per deployment. Unused modules add zero startup cost.</div></div>
+      <div class="step"><span class="step-n">03 — REPORT</span><div class="step-t">Connect to national HMIS</div><div class="step-b">Set DHIS2_URL and your facility's data element UIDs. OPD, malaria, TB, EPI, and HIV PEPFAR indicators automatically.</div></div>
+      <div class="step"><span class="step-n">04 — INTEGRATE</span><div class="step-t">Launch from any SMART EHR</div><div class="step-b">Set emr.security.mode=smart and register with Epic, Cerner, or any SMART v2-compliant EHR. PKCE launch flow in under 10 minutes.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SMART — sky vivid ── -->
+<section class="sec-vivid2" id="smart">
+  <div class="wrap">
+    <div class="lbl lbl-v">SMART on FHIR</div>
+    <h2 class="h2 h2-v">Full SMART App Launch v2.0 — every control, no shortcuts</h2>
+    <p class="sub sub-v">Jam EMR implements the complete SMART App Launch Framework v2.0. Not a subset, not "mostly compliant." Every PKCE parameter, every RS256 claim, every token-refresh rule — implemented to spec.</p>
+    <div class="ss-list">
+      <div class="ss"><div class="ss-num">1</div><div><div class="ss-t">EHR initiates the launch</div><div class="ss-b">Epic, Cerner, or any SMART EHR calls <code>GET /smart/launch?iss=&amp;launch=</code>. The EMR validates ISS against the SMART discovery document (cached per-ISS), builds a PKCE pair with a 96-byte cryptographically random verifier and S256 challenge, then redirects to the EHR authorize endpoint with a state nonce for CSRF protection.</div></div></div>
+      <div class="ss"><div class="ss-num">2</div><div><div class="ss-t">Identity verified with RS256 — no trust-on-first-use</div><div class="ss-b">After code exchange, the id_token is validated using Nimbus JOSE+JWT <code>DefaultJWTProcessor</code> with <code>RemoteJWKSet</code> against the EHR's JWKS endpoint. Signature, expiry, issuer, audience, and nonce all verified. Full RFC 7517 key rotation support — no key pinning that breaks on EHR certificate renewals.</div></div></div>
+      <div class="ss"><div class="ss-num">3</div><div><div class="ss-t">Session secured, tokens proactively refreshed</div><div class="ss-b">SmartLaunchContext stored in HTTP session with session-fixation protection. <code>SmartSecurityFilter</code> populates the Spring SecurityContext on every request. <code>TokenRefreshFilter</code> proactively refreshes tokens on <code>/api/**</code> routes 120 seconds before expiry — no expired-token errors surfacing to clinicians mid-workflow.</div></div></div>
+    </div>
+    <div class="smart-tech">
+      <div class="smt"><div class="smt-k">PKCE</div><div class="smt-v">96-byte verifier</div><div class="smt-s">S256 challenge · RFC 7636</div></div>
+      <div class="smt"><div class="smt-k">ID token</div><div class="smt-v">RS256 · RemoteJWKSet</div><div class="smt-s">Nimbus DefaultJWTProcessor</div></div>
+      <div class="smt"><div class="smt-k">Token refresh</div><div class="smt-v">120s proactive</div><div class="smt-s">Before expiry · /api/** routes</div></div>
+      <div class="smt"><div class="smt-k">CSRF</div><div class="smt-v">Double Submit Cookie</div><div class="smt-s">CookieCsrfTokenRepository</div></div>
+      <div class="smt"><div class="smt-k">Session</div><div class="smt-v">Fixation protection</div><div class="smt-s">changeSessionId() on auth</div></div>
+      <div class="smt"><div class="smt-k">Security mode</div><div class="smt-v">3-mode config</div><div class="smt-s">development · smart · basic</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Security ── -->
+<section class="sec-snow" id="security">
+  <div class="wrap">
+    <div class="lbl">Security &amp; compliance</div>
+    <h2 class="h2">Production-hardened — every control is explicit and documented</h2>
+    <p class="sub">Clinical systems handle the most sensitive personal data that exists. Every security control in Jam EMR is deliberate — because "it probably works" is not acceptable in healthcare.</p>
+    <div class="sec-b-grid">
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="sb-t">HTTP security headers — all modes</div><div class="sb-b">CSP, X-Frame-Options: DENY, Referrer-Policy: strict-origin, Permissions-Policy (camera, mic, geolocation off). Applied via <code>applySecurityHeaders()</code> in every security mode.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><div class="sb-t">HSTS — smart mode only</div><div class="sb-b"><code>max-age=31536000</code>, <code>includeSubDomains</code>. Only activated with <code>emr.security.mode=smart</code> — skipped in development so plain-HTTP local setups work normally.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><div class="sb-t">Global exception handler — no stack traces in browser</div><div class="sb-b"><code>@ControllerAdvice</code> catches every unhandled exception. HAPI URLs, JDBC connection strings, and internal paths are stripped by <code>sanitise()</code> before any message reaches the browser.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="sb-t">138 FHIR AuditEvent call sites — IHE ATNA aligned</div><div class="sb-b">Every CREATE, UPDATE, DELETE, and CDS-ALERT across all 16 modules written as a FHIR AuditEvent asynchronously. Audit writes never block the HTTP request thread.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="sb-t">@PreAuthorize at the service layer, not just controllers</div><div class="sb-b">HIV (<code>ROLE_HIV_PROVIDER</code>) and STD (<code>ROLE_STD_PROVIDER</code>) enforcement on service methods — protection holds in every security mode including development.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div class="sb-t">STD privacy stack — FHIR labels + Cache-Control: no-store</div><div class="sb-b">Sexual health resources carry FHIR security labels. All <code>/std/**</code> responses set <code>Cache-Control: no-store, Pragma: no-cache</code>. ICD-10 A50–A64 filtered from general condition lists.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div><div><div class="sb-t">Patient deactivation — POST only, never GET</div><div class="sb-b"><code>POST /patients/deactivate/{id}</code> sets <code>Patient.active=false</code> (CSRF-protected, preserves full record history). The GET delete URL redirects with an error — no link-based or crawled data loss.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="sb-t">Caffeine cache — 60s TTL, 200 entries max</div><div class="sb-b">Replaces <code>ConcurrentMapCacheManager</code> which had no eviction. Bounded cache prevents unbounded memory growth on high-traffic deployments with thousands of daily dashboard loads.</div></div></div>
+      <div class="sec-b"><div class="sb-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><div class="sb-t">Actuator — only health + info endpoints exposed</div><div class="sb-b">Spring Boot Actuator exposes <code>/actuator/health</code> (Docker/K8s probe) and <code>/actuator/info</code> only. <code>/actuator/env</code>, <code>/actuator/beans</code>, and all introspection endpoints are never accessible.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── National alignment — vivid forest ── -->
+<section class="sec-vivid">
+  <div class="wrap">
+    <div class="lbl lbl-v">National alignment</div>
+    <h2 class="h2 h2-v">Built for health systems, not just individual clinics</h2>
+    <p class="sub sub-v">Configure your country's DHIS2 UID mappings once and the reporting module handles the rest. PEPFAR/DATIM UIDs are pre-configured across all deployments.</p>
+    <div class="nation-grid">
+      <div class="nc"><div class="nc-flag">🇰🇪 <span>Kenya — KHIS</span></div><div class="nc-spec">Kenya Health Information System · DHIS2-based · OPD, maternal, immunisation</div><div class="nc-match">Set DHIS2_URL=https://hiskenya.org</div><div class="nc-tags"><span class="nc-tag">OPD indicators</span><span class="nc-tag">Malaria B50–B54</span><span class="nc-tag">EPI antigens</span></div></div>
+      <div class="nc"><div class="nc-flag">🇺🇬 <span>Uganda — DHIS2</span></div><div class="nc-spec">Ministry of Health DHIS2 · District-level facility reporting · HIV care</div><div class="nc-match">Set DHIS2_URL=https://dhis.health.go.ug</div><div class="nc-tags"><span class="nc-tag">HIV programme</span><span class="nc-tag">TB cases</span><span class="nc-tag">OPD attendance</span></div></div>
+      <div class="nc"><div class="nc-flag">🌍 <span>PEPFAR / DATIM</span></div><div class="nc-spec">PEPFAR MER indicators · 20+ countries · Standardised UIDs across all programs</div><div class="nc-match">Pre-configured — no setup needed</div><div class="nc-tags"><span class="nc-tag">TX_CURR</span><span class="nc-tag">TX_NEW</span><span class="nc-tag">HTS_TST</span><span class="nc-tag">HTS_POS</span></div></div>
+      <div class="nc"><div class="nc-flag">🇮🇳 <span>India — ABDM / NHM</span></div><div class="nc-spec">Ayushman Bharat Digital Mission · FHIR-based exchange · NHM HMIS</div><div class="nc-match">HMIS CSV export compatible</div><div class="nc-tags"><span class="nc-tag">FHIR ABDM profiles</span><span class="nc-tag">OPD data</span></div></div>
+      <div class="nc"><div class="nc-flag">🇬🇭 <span>Ghana — DHIMS2</span></div><div class="nc-spec">Ghana Health Service · Disease surveillance · EPI programme</div><div class="nc-match">Set DHIS2_URL=https://dhims.chimiphgh.org</div><div class="nc-tags"><span class="nc-tag">Disease burden</span><span class="nc-tag">EPI coverage</span></div></div>
+      <div class="nc"><div class="nc-flag">🌐 <span>Any DHIS2 country</span></div><div class="nc-spec">80+ countries run national DHIS2 · Configure with your data element UIDs</div><div class="nc-match">Any DHIS2 v2.36+ Web API supported</div><div class="nc-tags"><span class="nc-tag">dataValueSet POST</span><span class="nc-tag">Age/sex disagg</span><span class="nc-tag">JSON + CSV</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Compare ── -->
+<section class="sec-sage" id="compare">
+  <div class="wrap">
+    <div class="lbl">Comparison</div>
+    <h2 class="h2">Where Jam EMR stands out</h2>
+    <p class="sub">Jam EMR leads in three areas no other open source EMR addresses together: native FHIR storage, automatic CDS that fires without configuration, and a complete insurance revenue cycle expressed entirely in FHIR resources.</p>
+    <div class="cw">
+      <table class="cmp">
+        <thead><tr><th>Feature</th><th class="jc">Jam EMR</th><th>OpenMRS 3.x</th><th>Bahmni</th><th>GNU Health</th><th>OSCAR EMR</th></tr></thead>
+        <tbody>
+          <tr><td>FHIR R4 as native storage</td><td class="jc"><span class="ck">✓ Native HAPI JPA</span></td><td><span class="pt">Adapter</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>SMART App Launch v2.0 (PKCE + RS256)</td><td class="jc"><span class="ck">✓ Full v2.0</span></td><td><span class="pt">Partial</span></td><td><span class="pt">Partial</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>Drug-allergy CDS at prescribing (auto)</td><td class="jc"><span class="ck">✓ 3-level match</span></td><td><span class="xx">✗</span></td><td><span class="pt">Pharmacy only</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>NEWS2 early warning score (automatic)</td><td class="jc"><span class="ck">✓ Every vitals save</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>FHIR insurance claim lifecycle (3 phases)</td><td class="jc"><span class="ck">✓ Coverage → Claim → ClaimResponse</span></td><td><span class="xx">✗</span></td><td><span class="pt">Non-FHIR</span></td><td><span class="pt">Partial</span></td><td><span class="ck">✓ (non-FHIR)</span></td></tr>
+          <tr><td>DHIS2 / DATIM national reporting</td><td class="jc"><span class="ck">✓ Built-in</span></td><td><span class="pt">Module</span></td><td><span class="pt">Module</span></td><td><span class="pt">Export only</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>STD privacy stack (FHIR security labels)</td><td class="jc"><span class="ck">✓ Labels + no-store headers</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>WHO growth charts + z-scores</td><td class="jc"><span class="ck">✓ WAZ / HAZ / WHZ</span></td><td><span class="pt">Module</span></td><td><span class="ck">✓</span></td><td><span class="pt">Partial</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>Orthanc PACS + OHIF Viewer 3</td><td class="jc"><span class="ck">✓ In Docker Compose</span></td><td><span class="pt">Module</span></td><td><span class="ck">✓ dcm4chee</span></td><td><span class="pt">Partial</span></td><td><span class="pt">Partial</span></td></tr>
+          <tr><td>Spring Modulith architecture (build-time)</td><td class="jc"><span class="ck">✓ Verified every build</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>Single command deploy (docker compose up)</td><td class="jc"><span class="ck">✓</span></td><td><span class="pt">Partial</span></td><td><span class="ck">✓</span></td><td><span class="pt">Partial</span></td><td><span class="xx">✗</span></td></tr>
+          <tr><td>Open source licence</td><td class="jc"><span class="ck">MIT</span></td><td><span class="ck">MPL 2.0</span></td><td><span class="ck">LGPL / MPL</span></td><td><span class="ck">GPL 3.0</span></td><td><span class="ck">GPL 2.0</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="met-row">
+      <div class="met"><span class="met-n">188</span><span class="met-l">Java files · no generated code</span></div>
+      <div class="met"><span class="met-n">16</span><span class="met-l">Modulith modules · verified</span></div>
+      <div class="met"><span class="met-n">27</span><span class="met-l">FHIR R4 resource types</span></div>
+      <div class="met"><span class="met-n">7</span><span class="met-l">Spring application events</span></div>
+      <div class="met"><span class="met-n">3</span><span class="met-l">Insurance phases complete</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="lbl lbl-s">Frequently asked</div>
+    <h2 class="h2">Questions from evaluators</h2>
+    <div class="faq">
+      <details class="fi"><summary>Why use FHIR R4 as the storage layer rather than just an export format? <span class="fi-chev">↓</span></summary><div class="fi-ans">Other EMRs store data in a proprietary schema and generate FHIR on demand — meaning FHIR queries are slow, the schema drifts from the spec over time, and external systems need custom integration work. Jam EMR stores directly as FHIR resources in HAPI FHIR JPA. Any FHIR-capable system — Epic, Cerner, a public health dashboard, a mobile app — can query <code>http://localhost:8090/fhir</code> with standard FHIR search parameters from day one. No custom adapter work, ever.</div></details>
+      <details class="fi"><summary>How does the insurance revenue cycle work end-to-end? <span class="fi-chev">↓</span></summary><div class="fi-ans">Phase 1: Record the patient's <code>Coverage</code> (insurer, policy number, copay/deductible). Phase 2: Generate a <code>Claim</code> from the issued Invoice — pre-tax line items map to <code>Claim.item[]</code>, 5 claim-tracking extensions are written back to the Invoice so billing and insurance modules stay independent. Phase 3: When the insurer's Remittance Advice arrives, record a <code>ClaimResponse</code>. Click "Reconcile Invoice" to set <code>insuranceCovered</code>, update <code>patientOwes</code>, and mark the invoice <code>balanced</code>. If a gap remains, the invoice stays <code>issued</code> so billing can collect the patient's portion normally.</div></details>
+      <details class="fi"><summary>What does DHIS2 reporting require to configure? <span class="fi-chev">↓</span></summary><div class="fi-ans">Four environment variables: <code>DHIS2_URL</code>, <code>DHIS2_USERNAME</code>, <code>DHIS2_PASSWORD</code>, and <code>DHIS2_ORG_UNIT</code> (your facility's org unit UID). Then one property per indicator mapping your data element UIDs. PEPFAR DATIM UIDs (TX_CURR, TX_NEW, HTS_TST, HTS_POS) are pre-configured and don't vary by country. In download-only mode you still get a JSON dataValueSet and HMIS CSV for manual upload.</div></details>
+      <details class="fi"><summary>Can I add custom modules without forking? <span class="fi-chev">↓</span></summary><div class="fi-ans">Yes. Create <code>com.emr.fhir.yourmodule</code>, add a <code>package-info.java</code> with <code>@ApplicationModule(allowedDependencies = {"core"})</code>, annotate your service with <code>@ConditionalOnProperty</code>, and add the flag to Docker Compose. The Modulith architecture test verifies your boundary declarations on every build. Subscribe to existing clinical events without coupling to any other module's internal classes.</div></details>
+      <details class="fi"><summary>Can Jam EMR run without internet access? <span class="fi-chev">↓</span></summary><div class="fi-ans">Completely. Docker Compose includes a local HAPI FHIR JPA instance backed by PostgreSQL — no external FHIR server required. All clinical operations work locally with no network access. The only internet-dependent features are SMART on FHIR (requires the EHR's JWKS endpoint) and DHIS2 submission (requires the national HMIS URL). Both are optional and fully skippable in air-gapped environments.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Support ── -->
+<section class="sec-cream tc">
+  <div class="wrap">
+    <div class="lbl">Support tiers</div>
+    <h2 class="h2">Open source. Professionally supported.</h2>
+    <p class="sub">Community support is free and permanent. Structured support is available for clinics and governments that need deployment guarantees.</p>
+    <div class="sup-grid">
+      <div class="sup"><div class="sup-tier">Community</div><div class="sup-price">Free forever</div><ul class="sup-ul"><li>GitHub Issues + Discussions</li><li>Full documentation</li><li>All releases · MIT licence</li></ul></div>
+      <div class="sup"><div class="sup-tier">Standard</div><div class="sup-price">Contact us</div><ul class="sup-ul"><li>Email support</li><li>2-business-day SLA</li><li>Security patch notifications</li><li>Configuration guidance</li></ul></div>
+      <div class="sup rec"><div class="sup-badge">Recommended</div><div class="sup-tier">Enterprise</div><div class="sup-price">Contact us</div><ul class="sup-ul"><li>Phone + email support</li><li>4-hour SLA</li><li>24-hour security patches</li><li>Custom feature roadmap</li><li>On-premises deployment</li></ul></div>
+      <div class="sup"><div class="sup-tier">Government</div><div class="sup-price">Contact us</div><ul class="sup-ul"><li>Custom SLA · 24/7 coverage</li><li>National DHIS2/DATIM alignment</li><li>Technical team training</li><li>Procurement documentation</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><div class="foot-brand-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>Jam EMR</div>
+        <div class="foot-tag">Open source FHIR R4 electronic medical records for clinics, district hospitals, and national health systems. MIT licensed. No vendor lock-in.</div>
+      </div>
+      <div><div class="foot-col-h">Platform</div><ul class="foot-links"><li><a href="#modules">Modules</a></li><li><a href="#technical">Architecture</a></li><li><a href="#deploy">Quick start</a></li><li><a href="#compare">Comparison</a></li><li><a href="https://github.com/vedpr625/FHIR-Electronic-Medical-Records" target="_blank">GitHub →</a></li></ul></div>
+      <div><div class="foot-col-h">Clinical</div><ul class="foot-links"><li><a href="#modules">Patient registry</a></li><li><a href="#modules">Insurance (Phase 1–3)</a></li><li><a href="#modules">HIV / ART programme</a></li><li><a href="#modules">Paediatrics + growth</a></li><li><a href="#modules">National reporting</a></li></ul></div>
+      <div><div class="foot-col-h">Standards</div><ul class="foot-links"><li><a href="https://hl7.org/fhir/R4/" target="_blank">HL7 FHIR R4</a></li><li><a href="https://hl7.org/fhir/smart-app-launch/" target="_blank">SMART App Launch v2</a></li><li><a href="https://docs.dhis2.org" target="_blank">DHIS2 Web API</a></li><li><a href="https://hapifhir.io" target="_blank">HAPI FHIR 7</a></li><li><a href="https://profiles.ihe.net/ITI/ATNA/" target="_blank">IHE ATNA</a></li></ul></div>
+    </div>
+    <div class="foot-bottom">
+      <div class="foot-copy">© 2026 Jam EMR · MIT Licence · FHIR® is a registered trademark of HL7</div>
+      <div class="foot-stack"><span>Spring Boot 3.2</span><span>·</span><span>HAPI FHIR 7</span><span>·</span><span>Java 17</span><span>·</span><span>Spring Modulith 1.1</span><span>·</span><span>PostgreSQL 15</span></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}
+  })
+});
+</script>
+</body>
+</html>
